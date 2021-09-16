@@ -20,20 +20,21 @@ app.get('/hook', api.read)
 
 app.delete('/hook/:id', api.delete)
 
-// let newSocket
-
+//web socket connection
 let socket = io.on('connection', (socket) => {
-    newSocket = socket
     socket.emit('message', '1')
 })
 
+//webhook endpoint
 app.post('/hook/:id', async (req, res) => {
     try {
         const ID = req.params.id
         const hook = await Hook.findById(ID)
+        if(!hook){
+            return res.sendStatus(404)
+        }
         hook.data.unshift(req.body.data)
         await hook.save()
-        
         socket.emit('message', `1`)
         return res.sendStatus(200)
     } catch (error) {
